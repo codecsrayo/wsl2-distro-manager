@@ -56,15 +56,17 @@ flutter:
 
 msix_config:
   display_name: WSL Manager
-  publisher_display_name: Bostrot
-  identity_name: 9891PhantomDevs.WSL2Manager
+  publisher_display_name: WslManagerDev
+  identity_name: WslManagerDev.WSL2Manager
   msix_version: 1.8.2.0
-  publisher: CN=94697CA2-9680-453C-A7CB-2FA531A4A341
+  publisher: CN=WslManagerDev
   logo_path: .\assets\logo_wsl_manager.png
   start_menu_icon_path: .\assets\logo_wsl_manager.png
   tile_icon_path: .\assets\logo_wsl_manager.png
   icons_background_color: transparent
   architecture: x64
   capabilities: "internetClient"
-  store: true
+  store: false
+  certificate_path: wslmanager.pfx
+  certificate_password: wslmanager123
   languages: en-US, en-GB, en-AU, de-DE, pt-BR, pt-PT, zh-CN, zh-TW, tr-TR
