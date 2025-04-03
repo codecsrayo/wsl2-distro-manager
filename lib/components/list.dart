@@ -127,7 +127,7 @@ class DistroListState extends State<DistroList> {
                 Padding(
                   padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
                   child: Text(
-                    '${list.length} distros',
+                    'Distros ${list.length}',
                     style: FluentTheme.of(context).typography.subtitle,
                   ),
                 ),
