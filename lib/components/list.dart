@@ -59,39 +59,85 @@ class DistroListState extends State<DistroList> {
 
   @override
   Widget build(BuildContext context) {
+    // Agregar identificador para depurar
+    debugPrint('Build de DistroList ejecutándose, hora: ${DateTime.now().toString()}');
+      
+    // Verificar si tenemos un snapshot cacheado para usar
+    if (GlobalVariable.initialSnapshot == null) {
+      // Forzar una actualización inmediata de la lista
+      debugPrint('initialSnapshot es null, solicitando nueva lista de WSL');
+    }
+    
     // List as FutureBuilder with WSLApi
     return FutureBuilder<Instances>(
       future: widget.api.list(showDocker),
       initialData: GlobalVariable.initialSnapshot,
       builder: (context, snapshot) {
-        // Update every 20 seconds
+        // Guardar el resultado para futuras referencias
         if (snapshot.hasData) {
+          // Imprimir información del snapshot para depuración
+          debugPrint('Snapshot tiene datos: ${snapshot.data?.all.length} distribuciones');
+          
+          // Guardar datos en variable global para persistencia
           GlobalVariable.initialSnapshot = snapshot.data;
+          
           List<Widget> newList = [];
           List<String> list = snapshot.data?.all ?? [];
           List<String> running = snapshot.data?.running ?? [];
+          
           // Check if there are distros
           if (list.isEmpty) {
+            debugPrint('Lista de distribuciones está vacía');
             return Expanded(
               child: Center(
                 child: Text('noinstancesfound-text'.i18n()),
               ),
             );
           }
+          
           // Check if WSL is installed
           if (list[0] == 'wslNotInstalled') {
+            debugPrint('WSL no está instalado');
             return const InstallDialog();
           }
+          
+          // Asegurar que siempre tengamos elementos visibles
+          debugPrint('Creando ${list.length} elementos de lista para mostrar');
           for (String item in list) {
-            newList.add(ListItem(
-              item: item,
-              running: running,
-              trailing: getInstanceSize(item),
-            ));
+            newList.add(
+              Container(
+                // Añadimos un key único basado en el nombre para preservar el estado
+                key: Key('distro-$item'),
+                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                child: ListItem(
+                  item: item,
+                  running: running,
+                  trailing: getInstanceSize(item),
+                ),
+              )
+            );
           }
+          
+          // Usar Column para mostrar un encabezado permanente
           return Expanded(
-            child: ListView.custom(
-              childrenDelegate: SliverChildListDelegate(newList),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Encabezado que siempre será visible
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+                  child: Text(
+                    '${list.length} distros',
+                    style: FluentTheme.of(context).typography.subtitle,
+                  ),
+                ),
+                // Lista con los elementos
+                Expanded(
+                  child: ListView.custom(
+                    childrenDelegate: SliverChildListDelegate(newList),
+                  ),
+                ),
+              ],
             ),
           );
         } else if (snapshot.hasError) {

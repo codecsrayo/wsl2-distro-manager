@@ -11,6 +11,7 @@ import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/notify.dart';
 import 'package:wsl2distromanager/dialogs/dialogs.dart';
 import 'package:wsl2distromanager/theme.dart';
+import 'package:wsl2distromanager/nav/router.dart'; // Importamos router para acceder a rootNavigatorKey
 
 /// Create Dialog
 createDialog() {
@@ -21,8 +22,15 @@ createDialog() {
   final userController = TextEditingController();
   plausible.event(page: 'create');
 
-  // Get root context by Key
-  final context = GlobalVariable.infobox.currentContext!;
+  // Obtener el contexto del navegador principal mediante rootNavigatorKey
+  // Esto evita depender de GlobalVariable.infobox que puede ser nulo
+  final context = rootNavigatorKey.currentContext;
+  
+  // Si el contexto es nulo, no podemos mostrar el diálogo
+  if (context == null) {
+    debugPrint('Error: No se pudo obtener el contexto para mostrar el diálogo');
+    return;
+  }
 
   showDialog(
     useRootNavigator: false,

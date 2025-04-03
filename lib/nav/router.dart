@@ -11,8 +11,14 @@ import 'package:wsl2distromanager/screens/template_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
+// Configuración para preservar el estado de las páginas
+
 final router = GoRouter(
   navigatorKey: rootNavigatorKey,
+  initialLocation: '/',
+  // Esto ayuda a preservar el estado en algunos escenarios
+  restorationScopeId: 'app',
   routes: [
     ShellRoute(
       observers: [PlausibleNavigatorObserver(plausible)],

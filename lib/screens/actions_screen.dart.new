@@ -1,0 +1,382 @@
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:localization/localization.dart';
+import 'package:re_editor/re_editor.dart';
+import 'package:wsl2distromanager/components/analytics.dart';
+import 'package:wsl2distromanager/components/helpers.dart';
+import 'package:wsl2distromanager/dialogs/base_dialog.dart';
+import 'package:wsl2distromanager/dialogs/qa_dialog.dart';
+import 'package:wsl2distromanager/theme.dart';
+import 'package:wsl2distromanager/api/quick_actions.dart';
+import 'package:re_highlight/languages/bash.dart';
+import 'package:re_highlight/styles/atom-one-light.dart';
+
+class QuickPage extends StatefulWidget {
+  const QuickPage({Key? key}) : super(key: key);
+
+  @override
+  QuickPageState createState() => QuickPageState();
+}
+
+class QuickPageState extends State<QuickPage> {
+  List<Widget> quickSettings = [];
+  String lineNumbers = '';
+  bool showInput = false;
+  var scrollController = ScrollController();
+  var nameController = TextEditingController();
+  var contentController = CodeLineEditingController();
+  int lineNum = 30;
+
+  @override
+  void initState() {
+    super.initState();
+
+    plausible.event(page: 'actions_screen');
+    genLineNumbers(0);
+    scrollController.addListener(() {
+      lineNumbers = '';
+      int offset = (scrollController.offset ~/ 12);
+      genLineNumbers(offset);
+    });
+  }
+
+  void genLineNumbers(int offset) {
+    for (int i = 1 + offset; i < lineNum + offset + 1; i++) {
+      lineNumbers += i.toString();
+      if (i < lineNum + offset) {
+        lineNumbers += '\n';
+      }
+    }
+    setState(() {
+      lineNumbers = lineNumbers;
+    });
+  }
+
+  Map<int, bool> opened = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: double.infinity,
+      child: Stack(
+        children: [
+          !showInput ? communityActionsBtn() : Container(),
+          Positioned(
+            left: 20.0,
+            right: 20.0,
+            bottom: 10.0,
+            child: Column(
+              children: [
+                showInput
+                    ? SizedBox(
+                        width: MediaQuery.of(context).size.width - 40.0,
+                        height: 35.0,
+                        child: TextBox(
+                          controller: nameController,
+                          placeholder: 'settingname-text'.i18n(),
+                        ),
+                      )
+                    : Container(),
+                showInput
+                    ? const SizedBox(
+                        height: 10.0,
+                      )
+                    : Container(),
+                // TODO: Better line numbers
+                showInput
+                    ? Editor(
+                        contentController: contentController,
+                        scrollController: scrollController,
+                        lineNumbers: lineNumbers,
+                        lineNum: lineNum)
+                    : Container(),
+                //const SizedBox(height: 10.0),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 40.0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: bottomButtonRow(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Padding communityActionsBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Column(
+        children: [
+          !showInput
+              ? Button(
+                  style: ButtonStyle(
+                      padding: ButtonState.all<EdgeInsets>(
+                          const EdgeInsets.only(
+                              top: 8.0, bottom: 8.0, left: 20.0, right: 20.0))),
+                  onPressed: () {
+                    // Open qa_dialog
+                    communityDialog(() => setState(
+                          () {},
+                        ));
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(FluentIcons.cloud_download),
+                      const SizedBox(
+                        width: 10.0,
+                      ),
+                      Text('addcommunityactions-text'.i18n()),
+                    ],
+                  ),
+                )
+              : Container(),
+          Flexible(
+              child: SingleChildScrollView(child: quickSettingsListBuilder())),
+        ],
+      ),
+    );
+  }
+
+  Row bottomButtonRow() {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            showInput
+                ? Button(
+                    style: ButtonStyle(
+                        padding: ButtonState.all<EdgeInsets>(
+                            const EdgeInsets.only(
+                                top: 8.0,
+                                bottom: 8.0,
+                                left: 20.0,
+                                right: 20.0))),
+                    onPressed: () {
+                      setState(() {
+                        showInput = false;
+                      });
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(FluentIcons.chrome_close),
+                        const SizedBox(
+                          width: 10.0,
+                        ),
+                        Text('close-text'.i18n()),
+                      ],
+                    ),
+                  )
+                : Container(),
+            const SizedBox(
+              width: 10.0,
+            ),
+            Button(
+              style: ButtonStyle(
+                  padding: ButtonState.all<EdgeInsets>(const EdgeInsets.only(
+                      top: 8.0, bottom: 8.0, left: 20.0, right: 20.0))),
+              onPressed: () {
+                if (!showInput) {
+                  setState(() {
+                    showInput = true;
+                  });
+                } else if (nameController.text.isNotEmpty &&
+                    contentController.text.isNotEmpty) {
+                  plausible.event(page: 'add_action');
+
+                  // Load data
+                  loadQuickActions((list) {
+                    Map<String, String> items = list;
+                    items.addAll({nameController.text: contentController.text});
+                    saveQuickActions(items);
+                    setState(() {
+                      showInput = false;
+                      nameController.text = '';
+                      contentController.text = '';
+                    });
+                  });
+                }
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    showInput ? FluentIcons.save : FluentIcons.add,
+                  ),
+                  const SizedBox(
+                    width: 10.0,
+                  ),
+                  showInput
+                      ? Text('save-text'.i18n())
+                      : Text('addquickaction-text'.i18n()),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget quickSettingsListBuilder() {
+    return FutureBuilder<Map<String, String>>(
+      future: getQuickActionsList(),
+      builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
+        if (snapshot.hasData) {
+          if (snapshot.data!.isNotEmpty) {
+            List<Widget> items = [];
+            int count = 0;
+            snapshot.data!.forEach((key, value) {
+              items.add(
+                Container(
+                  padding: const EdgeInsets.all(0.0),
+                  margin: const EdgeInsets.all(0.0),
+                  child: Expander(
+                    header: Text(
+                      key,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      onPressed: () {
+                        removeQuickAction(key);
+                        setState(() {});
+                      },
+                      icon: const Icon(FluentIcons.delete),
+                    ),
+                    initiallyExpanded: false,
+                    onStateChanged: (bool open) {
+                      opened[count] = open;
+                    },
+                    content: SizedBox(
+                      width: MediaQuery.of(context).size.width - 110.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: CodeEditor(
+                                  readOnly: true,
+                                  controller: CodeLineEditingController.init(
+                                      text: value),
+                                  indicatorBuilder: (context, editingController,
+                                      chunkController, notifier) {
+                                    return Row(
+                                      children: [
+                                        DefaultCodeLineNumber(
+                                          controller: editingController,
+                                          notifier: notifier,
+                                        ),
+                                        DefaultCodeChunkIndicator(
+                                            width: 20,
+                                            controller: chunkController,
+                                            notifier: notifier)
+                                      ],
+                                    );
+                                  },
+                                  style: CodeEditorStyle(
+                                    codeTheme: CodeHighlightTheme(languages: {
+                                      'bash':
+                                          CodeHighlightThemeMode(mode: langBash)
+                                    }, theme: atomOneLightTheme),
+                                  ),
+                                )),
+                          ),
+                          IconButton(
+                            icon: const Icon(FluentIcons.download),
+                            onPressed: () {
+                              plausible.event(name: 'run_action');
+                              runQuickAction(value, key);
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+              count++;
+            });
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: items,
+            );
+          } else {
+            return Padding(
+              padding:
+                  EdgeInsets.only(top: MediaQuery.of(context).size.height / 2.5),
+              child: Center(
+                child: Text('addquickactioninfo-text'.i18n()),
+              ),
+            );
+          }
+        } else {
+          return Padding(
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height / 2.5),
+            child: Center(
+              child: Text('addquickactioninfo-text'.i18n()),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
+
+class Editor extends StatelessWidget {
+  const Editor({
+    Key? key,
+    required this.contentController,
+    required this.scrollController,
+    required this.lineNumbers,
+    required this.lineNum,
+  }) : super(key: key);
+
+  final CodeLineEditingController contentController;
+  final ScrollController scrollController;
+  final String lineNumbers;
+  final int lineNum;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.68,
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: CodeEditor(
+            hint: '# ${'yourcodehere-text'.i18n()}',
+            indicatorBuilder:
+                (context, editingController, chunkController, notifier) {
+              return Row(
+                children: [
+                  DefaultCodeLineNumber(
+                    controller: editingController,
+                    notifier: notifier,
+                  ),
+                  DefaultCodeChunkIndicator(
+                      width: 20,
+                      controller: chunkController,
+                      notifier: notifier)
+                ],
+              );
+            },
+            style: CodeEditorStyle(
+              codeTheme: CodeHighlightTheme(
+                  languages: {'bash': CodeHighlightThemeMode(mode: langBash)},
+                  theme: atomOneLightTheme),
+            ),
+            controller: contentController));
+  }
+}
