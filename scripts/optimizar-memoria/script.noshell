@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Optimizando memoria en WSL..."
+
+# Crear o actualizar archivo wsl.conf
+cat > /etc/wsl.conf << EOF
+[wsl2]
+memory=4GB
+swap=0
+processors=2
+EOF
+
+echo "Configuración completada. Reinicia WSL para aplicar los cambios."
+echo "Para reiniciar: wsl --shutdown desde PowerShell en Windows"

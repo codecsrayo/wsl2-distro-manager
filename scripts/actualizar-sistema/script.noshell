@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Actualizando el sistema..."
+apt update -y
+apt upgrade -y
+echo "Sistema actualizado correctamente!"

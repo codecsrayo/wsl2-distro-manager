@@ -121,7 +121,7 @@ class QuickPageState extends State<QuickPage> {
                     // Open qa_dialog
                     communityDialog(() => setState(
                           () {},
-                        ));
+                        ), context);
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

@@ -7,25 +7,35 @@ const String windowsStoreUrl = "https://www.microsoft.com/store/"
 const String defaultPath = 'C:\\WSL2-Distros';
 const int chunkSize = 16 * 1024;
 const String updateUrl =
-    'https://api.github.com/repos/bostrot/wsl2-distro-manager/releases';
+    'https://api.github.com/repos/codecsrayo/wsl2-distro-manager/releases';
 
 const String motdUrl =
-    'https://raw.githubusercontent.com/bostrot/wsl2-distro-manager/main/motd.json';
+    'https://raw.githubusercontent.com/codecsrayo/wsl2-distro-manager/main/motd.json';
 
 const String defaultRepoLink =
     'http://ftp.halifax.rwth-aachen.de/turnkeylinux/images/proxmox/';
 
 const String gitRepoLink =
-    'https://rawcdn.githack.com/bostrot/wsl2-distro-manager/main/images.json';
+    'https://raw.githubusercontent.com/codecsrayo/wsl2-distro-manager/main/images.json';
 
-String gitApiScriptsLink =
+// URLs del repositorio original
+String gitApiScriptsLinkOriginal =
     'https://api.github.com/repos/bostrot/wsl-scripts/contents/scripts';
+String repoScriptsOriginal =
+    'https://raw.githubusercontent.com/bostrot/wsl-scripts/main/scripts/';
 
-String repoScripts =
-    'https://rawcdn.githack.com/bostrot/wsl-scripts/main/scripts/';
+// URLs de tu repositorio personalizado
+String gitApiScriptsLinkPersonal =
+    'https://api.github.com/repos/codecsrayo/wsl2-distro-manager/contents/scripts';
+String repoScriptsPersonal =
+    'https://raw.githubusercontent.com/codecsrayo/wsl2-distro-manager/main/scripts/';
+
+// URLs activas (se utilizan en la aplicación)
+String gitApiScriptsLink = gitApiScriptsLinkOriginal; // Usando scripts originales mientras se suben los personales
+String repoScripts = repoScriptsOriginal; // Usando scripts originales mientras se suben los personales
 
 const String githubIssues =
-    'https://github.com/bostrot/wsl2-distro-manager/issues/new/choose';
+    'https://github.com/codecsrayo/wsl2-distro-manager/issues/new/choose';
 
 const String errorUrl =
     'https://n8n.aachen.dev/webhook/error-logging-1866548e-233f-4c09-a257-9f3deab055b3';
@@ -34,7 +44,7 @@ String explorerPath = '\\\\wsl.localhost';
 
 // Wiki links
 const String wikiDocker =
-    'https://github.com/bostrot/wsl2-distro-manager/wiki/Features#docker-images';
+    'https://github.com/codecsrayo/wsl2-distro-manager/wiki/Features#docker-images';
 
 // https://docs.microsoft.com/en-us/windows/wsl/install-on-server
 Map<String, String> distroRootfsLinks = {
@@ -53,15 +63,15 @@ Map<String, String> distroRootfsLinks = {
   'Alpine':
       'https://dl-cdn.alpinelinux.org/alpine/v3.15/releases/x86_64/alpine-minirootfs-3.15.0-x86_64.tar.gz',
   'Debian':
-      'https://github.com/bostrot/wsl2-distro-manager/releases/download/v0.6.1/debian_rootfs_x64.tar.gz',
+      'https://github.com/codecsrayo/wsl2-distro-manager/releases/download/v0.6.1/debian_rootfs_x64.tar.gz',
   'Kali Linux':
-      'https://github.com/bostrot/wsl2-distro-manager/releases/download/v0.6.1/kalilinux_rootfs_x64.tar.gz',
+      'https://github.com/codecsrayo/wsl2-distro-manager/releases/download/v0.6.1/kalilinux_rootfs_x64.tar.gz',
   'OpenSUSE':
-      'https://github.com/bostrot/wsl2-distro-manager/releases/download/v0.6.1/opensuse_rootfs_x64.tar.gz',
+      'https://github.com/codecsrayo/wsl2-distro-manager/releases/download/v0.6.1/opensuse_rootfs_x64.tar.gz',
   'SLES 12':
-      'https://github.com/bostrot/wsl2-distro-manager/releases/download/v0.6.1/sles12_rootfs_x64.tar.gz',
+      'https://github.com/codecsrayo/wsl2-distro-manager/releases/download/v0.6.1/sles12_rootfs_x64.tar.gz',
   'SLES 15':
-      'https://github.com/bostrot/wsl2-distro-manager/releases/download/v0.6.1/sles15_rootfs_x64.tar.gz',
+      'https://github.com/codecsrayo/wsl2-distro-manager/releases/download/v0.6.1/sles15_rootfs_x64.tar.gz',
 };
 
 const supportedLocalesList = [

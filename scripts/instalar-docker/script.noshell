@@ -1,0 +1,23 @@
+#!/bin/bash
+echo "Instalando Docker y Docker Compose..."
+apt update
+apt install -y apt-transport-https ca-certificates curl software-properties-common
+
+# Instalar Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+apt update
+apt install -y docker-ce
+usermod -aG docker $USER
+
+# Instalar Docker Compose
+echo "Instalando Docker Compose..."
+curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
+# Verificar instalación
+echo "Versiones instaladas:"
+docker --version
+docker-compose --version
+
+echo "Docker y Docker Compose instalados correctamente!"

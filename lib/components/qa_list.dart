@@ -37,14 +37,24 @@ class QaListState extends State<QaList> {
       print("downloading...");
     }
 
-    // Load data from git repo
+    // Load data from git repos
     try {
       for (var i = 0; i < selectedList.length; i++) {
         String name = selectedList[i].name;
+        QuickActionItem item = selectedList[i];
+        String repoToUse;
+        
+        // Determinar de qué repositorio descargar basado en la descripción
+        // Si contiene [Personal], usar el repositorio personal
+        if (item.description.contains("[Personal]")) {
+          repoToUse = repoScriptsPersonal;
+        } else {
+          repoToUse = repoScriptsOriginal;
+        }
+        
         // Get Script
         Response<dynamic> contentFile =
-            await Dio().get('$repoScripts/$name/script.noshell');
-        QuickActionItem item = selectedList[i];
+            await Dio().get('$repoToUse/$name/script.noshell');
         item.content = contentFile.data.toString();
         QuickAction.addToPrefs(item);
       }
@@ -56,28 +66,71 @@ class QaListState extends State<QaList> {
     }
   }
 
-  /// Get the list of scripts from the repo
+  /// Get the list of scripts from the repos (original and personal)
   Future<List<QuickActionItem?>> _getQuickActionsFromRepo() async {
     // Use cache
     if (items.isNotEmpty) {
       return items;
     }
-    // Load data from git repo
+    // Intentar cargar scripts del repositorio original
     try {
-      Response<dynamic> repo = await Dio().get(gitApiScriptsLink);
+      // Cargar scripts del repositorio original
+      Response<dynamic> repo = await Dio().get(gitApiScriptsLinkOriginal);
       List<dynamic> repoData = repo.data;
       for (var i = 0; i < repoData.length; i++) {
         String name = repoData[i]["name"];
-        // Get script metadata
-        Response<dynamic> infoFileResponse =
-            await Dio().get('$repoScripts/$name/info.yml');
-        // Save metadata to list
-        items.add(
-            QuickActionItem.fromYamlString(infoFileResponse.data.toString()));
+        try {
+          // Get script metadata
+          Response<dynamic> infoFileResponse =
+              await Dio().get('$repoScriptsOriginal/$name/info.yml');
+          // Save metadata to list
+          items.add(
+              QuickActionItem.fromYamlString(infoFileResponse.data.toString()));
+        } catch (innerErr) {
+          // Ignorar errores individuales para continuar con el siguiente script
+          if (kDebugMode) {
+            print("Error cargando script original: $name - $innerErr");
+          }
+        }
       }
     } catch (err) {
-      // Do nothing
-      throw Exception(err);
+      if (kDebugMode) {
+        print("Error cargando repositorio original: $err");
+      }
+      // Continuar incluso si hay error, para intentar con el repositorio personal
+    }
+    
+    // Intentar cargar scripts del repositorio personal
+    try {
+      // Cargar scripts del repositorio personal
+      Response<dynamic> repoPersonal = await Dio().get(gitApiScriptsLinkPersonal);
+      List<dynamic> repoDataPersonal = repoPersonal.data;
+      for (var i = 0; i < repoDataPersonal.length; i++) {
+        String name = repoDataPersonal[i]["name"];
+        try {
+          // Get script metadata
+          Response<dynamic> infoFileResponse =
+              await Dio().get('$repoScriptsPersonal/$name/info.yml');
+          // Save metadata to list with special mark to indicate it's from personal repo
+          var item = QuickActionItem.fromYamlString(infoFileResponse.data.toString());
+          // Añadir prefijo al nombre para distinguir y evitar conflictos
+          item.description = "${item.description} [Personal]";
+          items.add(item);
+        } catch (innerErr) {
+          // Ignorar errores individuales para continuar con el siguiente script
+          if (kDebugMode) {
+            print("Error cargando script personal: $name - $innerErr");
+          }
+        }
+      }
+    } catch (err) {
+      if (kDebugMode) {
+        print("Error cargando repositorio personal: $err");
+      }
+      // No lanzar excepción si falló el repositorio personal pero se cargaron scripts originales
+      if (items.isEmpty) {
+        throw Exception("No se pudieron cargar scripts de ningún repositorio");
+      }
     }
     return items;
   }

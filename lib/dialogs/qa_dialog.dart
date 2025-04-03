@@ -2,18 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:localization/localization.dart';
 import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/qa_list.dart';
 import 'package:wsl2distromanager/dialogs/info_dialog.dart';
 
 /// Community Dialog
-/// @param api: WSLApi
-void communityDialog(Function callback) {
+/// @param callback: Function to call after dialog is closed
+/// @param context: BuildContext to show the dialog in
+void communityDialog(Function callback, BuildContext context) {
   // Global Key
   final GlobalKey<QaListState> qaKey = GlobalKey<QaListState>();
-
-  // Get root context by Key
-  final context = GlobalVariable.infobox.currentContext!;
 
   plausible.event(page: 'open_community_dialog');
   showDialog(
