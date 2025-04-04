@@ -35,15 +35,19 @@
 ## 📦 Install
 
 <details>
-<summary>Microsoft Store</summary>
+<summary>Microsoft Store (Recomendado)</summary>
 
 This app is available on the [Microsoft Store](https://apps.microsoft.com/store/detail/wsl-manager/9NWS9K95NMJB?hl=en-us&gl=US).
 </details>
 
 <details>
-<summary>Direct download</summary>
+<summary>Direct download (ZIP/EXE)</summary>
 
-You can get this app with a direct download from the [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) page. The latest version is available as a zip file.
+You can get this app with a direct download from the [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) page. The latest version is available as a zip file or as an executable installer (.exe).
+
+1. Download the latest release from the [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) page
+2. If downloading the ZIP file: Extract the contents and run `wsl2-distro-manager.exe`
+3. If downloading the installer (.exe): Run the installer and follow the on-screen instructions
 </details>
 
 <details>
@@ -75,7 +79,28 @@ The last build can be found as artifacts in the "releaser" workflow or via [this
 
 </details>
 
+<details>
+<summary>Manual Installation</summary>
+
+If you're installing from source or a manual build:
+
+1. Copy the entire application folder to a location of your choice (e.g., `C:\Program Files\WSL Manager`)
+2. Create a shortcut to `wsl2-distro-manager.exe` on your desktop or start menu
+3. Make sure Windows has WSL2 enabled before running the application
+
+```powershell
+# Enable WSL if not already enabled
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+# Set WSL2 as default
+wsl --set-default-version 2
+```
+</details>
+
 ## ⚙️ Build
+
+### Flutter Build
 
 Make sure [flutter](https://flutter.dev/desktop) is installed:
 
@@ -85,6 +110,60 @@ flutter upgrade
 
 flutter build windows # build it
 flutter run -d windows # run it
+```
+
+### NSIS Installer Build
+
+To create an installer using NSIS (Nullsoft Scriptable Install System):
+
+1. First, build the Flutter Windows application
+```powershell
+flutter build windows --release
+```
+
+2. Install NSIS
+   - Download and install [NSIS](https://nsis.sourceforge.io/Download)
+   - Ensure NSIS is added to your PATH
+
+3. Create an NSIS script (installer.nsi) or use the one in the project
+
+4. Compile the installer
+```powershell
+# Navigate to the directory containing your NSIS script
+cd path\to\nsis\script
+
+# Compile the installer
+makensis installer.nsi
+```
+
+5. The installer will be created in the output directory specified in your NSIS script
+
+Example NSIS script structure:
+```nsis
+# Define application name, version, and publisher
+Name "WSL Manager"
+OutFile "wsl-manager-setup.exe"
+InstallDir "$PROGRAMFILES\WSL Manager"
+
+# Install section
+Section "Install"
+  SetOutPath $INSTDIR
+  File /r "path\to\build\windows\runner\Release\*.*"
+  
+  # Create shortcuts
+  CreateShortcut "$DESKTOP\WSL Manager.lnk" "$INSTDIR\wsl2-distro-manager.exe"
+  CreateShortcut "$SMPROGRAMS\WSL Manager.lnk" "$INSTDIR\wsl2-distro-manager.exe"
+  
+  # Write uninstaller
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+SectionEnd
+
+# Uninstall section
+Section "Uninstall"
+  Delete "$DESKTOP\WSL Manager.lnk"
+  Delete "$SMPROGRAMS\WSL Manager.lnk"
+  RMDir /r "$INSTDIR"
+SectionEnd
 ```
 
 ## Author
