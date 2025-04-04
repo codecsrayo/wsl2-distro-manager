@@ -302,6 +302,7 @@ class GlobalVariable {
   static final GlobalKey<RootPageState> root = GlobalKey<RootPageState>();
   static GlobalKey<NavigatorState> infobox = GlobalKey<NavigatorState>();
   static Instances? initialSnapshot;
+  static Function? refreshListCallback;
 }
 
 /// Return the general distro path. Distros are saved here by default.

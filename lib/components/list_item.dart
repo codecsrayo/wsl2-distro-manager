@@ -313,6 +313,10 @@ class Bar extends StatelessWidget {
                               await WSLApi().remove(widget.item);
                               Notify.message(
                                   'deletedinstance-text'.i18n([widget.item]));
+                              // Force immediate UI refresh after deletion
+                              if (GlobalVariable.refreshListCallback != null) {
+                                (GlobalVariable.refreshListCallback as Function)();
+                              }
                             });
                       }),
                 ),

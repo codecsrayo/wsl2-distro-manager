@@ -44,6 +44,14 @@ class DistroListState extends State<DistroList> {
   @override
   void initState() {
     init();
+    // Register callback to allow forced UI refresh from other components
+    GlobalVariable.refreshListCallback = () {
+      if (mounted) {
+        setState(() {
+          // Force UI refresh
+        });
+      }
+    };
     super.initState();
   }
 
