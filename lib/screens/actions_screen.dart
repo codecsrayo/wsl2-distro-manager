@@ -317,6 +317,7 @@ class QuickPageState extends State<QuickPage> {
                                   foregroundColor:
                                       ButtonState.all(Colors.white),
                                 ),
+                                providedContext: context,
                                 onSubmit: (inputText) {
                                   QuickAction.removeFromPrefs(quickActions[i]);
                                   setState(() {});

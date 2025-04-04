@@ -23,9 +23,10 @@ dialog({
   bool centerText = false,
   String cancelText = '',
   Function? onCancel,
+  BuildContext? providedContext,
 }) {
-  // Get root context by Key
-  final context = GlobalVariable.infobox.currentContext;
+  // Use provided context or get root context by Key
+  final context = providedContext ?? GlobalVariable.infobox.currentContext;
   if (context == null) {
     print('Error: No se pudo obtener el contexto para mostrar el diálogo');
     return; // Salir temprano si no hay contexto disponible
