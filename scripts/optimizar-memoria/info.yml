@@ -1,4 +1,4 @@
-name: optimizar-memoria
+name: optimize-memory
 description: Configure WSL to optimize memory usage in Windows
 version: 1.0.0
 author: codecsrayo

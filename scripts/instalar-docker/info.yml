@@ -1,4 +1,4 @@
-name: instalar-docker
+name: install-docker
 description: Install Docker on your WSL distribution
 version: 1.0.0
 author: codecsrayo

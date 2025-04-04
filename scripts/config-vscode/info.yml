@@ -1,4 +1,4 @@
-name: config-vscode
+name: vscode-config
 description: Configure VSCode to work with WSL
 version: 1.0.0
 author: codecsrayo

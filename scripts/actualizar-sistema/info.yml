@@ -1,4 +1,4 @@
-name: actualizar-sistema
+name: update-system
 description: Updates all Linux system packages
 version: 1.0.0
 author: codecsrayo
