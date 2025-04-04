@@ -43,18 +43,42 @@ class QaListState extends State<QaList> {
         String name = selectedList[i].name;
         QuickActionItem item = selectedList[i];
         String repoToUse;
+        String scriptPath = name; // Por defecto, usamos el mismo nombre
         
         // Determinar de qué repositorio descargar basado en la descripción
         // Si contiene [Personal], usar el repositorio personal
         if (item.description.contains("[Personal]")) {
           repoToUse = repoScriptsPersonal;
+          
+          // Mapear nombres en español a inglés para scripts personales
+          // Este mapeo es necesario porque cambiamos los nombres de carpetas a inglés
+          // pero la aplicación sigue usando los nombres originales en español
+          Map<String, String> spanishToEnglish = {
+            'actualizar-sistema': 'update-system',
+            'instalar-docker': 'install-docker',
+            'dev-web': 'web-dev',
+            'config-vscode': 'vscode-config',
+            'optimizar-memoria': 'optimize-memory'
+          };
+          
+          // Si el nombre en español existe en nuestro mapa, usamos el nombre en inglés
+          if (spanishToEnglish.containsKey(name)) {
+            scriptPath = spanishToEnglish[name]!;
+            if (kDebugMode) {
+              print("Mapeando nombre de script: $name → $scriptPath");
+            }
+          }
         } else {
           repoToUse = repoScriptsOriginal;
         }
         
-        // Get Script
+        // Get Script - Usando scriptPath (que puede ser el nombre original o el mapeado en inglés)
+        if (kDebugMode) {
+          print("Descargando script desde: $repoToUse/$scriptPath/script.noshell");
+        }
+        
         Response<dynamic> contentFile =
-            await Dio().get('$repoToUse/$name/script.noshell');
+            await Dio().get('$repoToUse/$scriptPath/script.noshell');
         item.content = contentFile.data.toString();
         QuickAction.addToPrefs(item);
       }

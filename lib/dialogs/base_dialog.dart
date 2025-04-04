@@ -25,7 +25,12 @@ dialog({
   Function? onCancel,
 }) {
   // Get root context by Key
-  final context = GlobalVariable.infobox.currentContext!;
+  final context = GlobalVariable.infobox.currentContext;
+  if (context == null) {
+    print('Error: No se pudo obtener el contexto para mostrar el diálogo');
+    return; // Salir temprano si no hay contexto disponible
+  }
+  
   final controller = TextEditingController();
   plausible.event(page: 'base_dialog');
   showDialog(
