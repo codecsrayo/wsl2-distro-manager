@@ -1,2 +1,7 @@
 name: instalar-docker
 description: Instala Docker en tu distribución WSL
+version: 1.0.0
+author: codecsrayo
+license: MIT
+git: https://github.com/codecsrayo/wsl2-distro-manager
+distro: Ubuntu

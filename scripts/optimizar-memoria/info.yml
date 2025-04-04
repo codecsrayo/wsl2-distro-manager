@@ -1,2 +1,7 @@
 name: optimizar-memoria
 description: Configura WSL para optimizar el uso de memoria en Windows
+version: 1.0.0
+author: codecsrayo
+license: MIT
+git: https://github.com/codecsrayo/wsl2-distro-manager
+distro: Any

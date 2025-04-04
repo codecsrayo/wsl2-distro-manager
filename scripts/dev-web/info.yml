@@ -1,2 +1,7 @@
 name: dev-web
 description: Instala herramientas para desarrollo web (Node.js, npm, etc.)
+version: 1.0.0
+author: codecsrayo
+license: MIT
+git: https://github.com/codecsrayo/wsl2-distro-manager
+distro: Ubuntu
