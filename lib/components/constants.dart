@@ -31,8 +31,8 @@ String repoScriptsPersonal =
     'https://raw.githubusercontent.com/codecsrayo/wsl2-distro-manager/main/scripts/';
 
 // URLs activas (se utilizan en la aplicación)
-String gitApiScriptsLink = gitApiScriptsLinkOriginal; // Usando scripts originales mientras se suben los personales
-String repoScripts = repoScriptsOriginal; // Usando scripts originales mientras se suben los personales
+String gitApiScriptsLink = gitApiScriptsLinkPersonal; // Usando scripts personales
+String repoScripts = repoScriptsPersonal; // Usando scripts personales
 
 const String githubIssues =
     'https://github.com/codecsrayo/wsl2-distro-manager/issues/new/choose';

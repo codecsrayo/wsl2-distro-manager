@@ -1,5 +1,5 @@
 name: config-vscode
-description: Configura VSCode para trabajar con WSL
+description: Configure VSCode to work with WSL
 version: 1.0.0
 author: codecsrayo
 license: MIT

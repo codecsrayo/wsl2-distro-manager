@@ -106,16 +106,30 @@ class QaListState extends State<QaList> {
       Response<dynamic> repoPersonal = await Dio().get(gitApiScriptsLinkPersonal);
       List<dynamic> repoDataPersonal = repoPersonal.data;
       for (var i = 0; i < repoDataPersonal.length; i++) {
+        // Solo procesar directorios, ignorar archivos individuales
+        if (repoDataPersonal[i]["type"] != "dir") continue;
+        
         String name = repoDataPersonal[i]["name"];
         try {
           // Get script metadata
           Response<dynamic> infoFileResponse =
               await Dio().get('$repoScriptsPersonal/$name/info.yml');
-          // Save metadata to list with special mark to indicate it's from personal repo
-          var item = QuickActionItem.fromYamlString(infoFileResponse.data.toString());
-          // Añadir prefijo al nombre para distinguir y evitar conflictos
-          item.description = "${item.description} [Personal]";
-          items.add(item);
+              
+          try {
+            // Intentar parsear el YAML con manejo de errores adicional
+            var item = QuickActionItem.fromYamlString(infoFileResponse.data.toString());
+            // Añadir prefijo al nombre para distinguir y evitar conflictos
+            item.description = "${item.description} [Personal]";
+            items.add(item);
+            if (kDebugMode) {
+              print("Script personal cargado exitosamente: $name");
+            }
+          } catch (yamlErr) {
+            if (kDebugMode) {
+              print("Error parseando YAML del script personal: $name - $yamlErr");
+              print("Contenido YAML problematico: ${infoFileResponse.data.toString()}");
+            }
+          }
         } catch (innerErr) {
           // Ignorar errores individuales para continuar con el siguiente script
           if (kDebugMode) {

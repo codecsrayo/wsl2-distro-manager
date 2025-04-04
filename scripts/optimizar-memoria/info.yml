@@ -1,5 +1,5 @@
 name: optimizar-memoria
-description: Configura WSL para optimizar el uso de memoria en Windows
+description: Configure WSL to optimize memory usage in Windows
 version: 1.0.0
 author: codecsrayo
 license: MIT

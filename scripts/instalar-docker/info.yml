@@ -1,5 +1,5 @@
 name: instalar-docker
-description: Instala Docker en tu distribución WSL
+description: Install Docker on your WSL distribution
 version: 1.0.0
 author: codecsrayo
 license: MIT
