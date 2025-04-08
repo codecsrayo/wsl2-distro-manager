@@ -3,7 +3,7 @@ echo "Instalando Docker y Docker Compose..."
 
 # Actualizar paquetes e instalar dependencias
 apt-get update
-apt-get install -y ca-certificates curl
+apt-get install -y ca-certificates curl make
 
 # Crear directorio para las claves GPG
 install -m 0755 -d /etc/apt/keyrings
