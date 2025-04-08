@@ -31,10 +31,50 @@ bugDialog() {
         SizedBox(
           height: 50.0,
           child: Button(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // Open github issue
-              launchUrlString(githubIssues);
+              // Intentar abrir github issue con manejo mejorado de errores
+              try {
+                final Uri url = Uri.parse(githubIssues);
+                final bool launched = await launchUrlString(
+                  url.toString(),
+                  mode: LaunchMode.externalApplication,
+                );
+                
+                if (!launched) {
+                  // Mostrar mensaje si no se pudo abrir el navegador
+                  final BuildContext appContext = GlobalVariable.infobox.currentContext!;
+                  showDialog(
+                    context: appContext,
+                    builder: (context) => ContentDialog(
+                      title: const Text('Error'),
+                      content: Text('No se pudo abrir: $githubIssues\n\nPor favor, copia esta URL y ábrela manualmente en tu navegador.'),
+                      actions: [
+                        Button(
+                          child: const Text('Aceptar'),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              } catch (e) {
+                // Capturar y mostrar cualquier error
+                final BuildContext appContext = GlobalVariable.infobox.currentContext!;
+                showDialog(
+                  context: appContext,
+                  builder: (context) => ContentDialog(
+                    title: const Text('Error'),
+                    content: Text('Error al abrir URL: $e'),
+                    actions: [
+                      Button(
+                        child: const Text('Aceptar'),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                );
+              }
             },
             child: Text('githubissue-text'.i18n()),
           ),
@@ -47,7 +87,7 @@ bugDialog() {
               // Upload log file
               uploadLog();
             },
-            child: Text('uploadlogfile-text'.i18n()),
+            child: Text('generatelog-text'.i18n()),
           ),
         ),
       ],

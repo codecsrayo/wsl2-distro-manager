@@ -2,11 +2,13 @@
 
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+// No necesitamos dio para la versión local
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:wsl2distromanager/api/safe_paths.dart';
 import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:wsl2distromanager/components/constants.dart';
+import 'package:wsl2distromanager/components/helpers.dart';
 
 /// Get log file path
 String getLogFilePath() {
@@ -70,21 +72,86 @@ void logError(Object error, StackTrace? stack, String? library) {
 
 /// Manually trigger upload of log file
 void uploadLog() async {
-  var file = File(getLogFilePath());
-  if (!await file.exists()) return;
+  try {
+    var file = File(getLogFilePath());
+    if (!await file.exists()) {
+      // Mostrar mensaje al usuario de que no hay archivo de log
+      final context = GlobalVariable.infobox.currentContext;
+      if (context != null) {
+        showDialog(
+          context: context,
+          builder: (context) => ContentDialog(
+            title: const Text('Error'),
+            content: const Text('No se encontró el archivo de registro. No hay registros para guardar.'),
+            actions: [
+              Button(
+                child: const Text('Aceptar'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
 
-  // Date only
-  var date = DateTime.now().toIso8601String().split('T')[0];
-
-  // Generate ID based on hostname, date and OS
-  var name = 'Logfile from $date on '
-      '${Platform.operatingSystem} with ${Platform.operatingSystemVersion}';
-
-  Dio().post(
-    errorUrl,
-    data: {
-      'error': name,
-      'stack': await file.readAsString(),
-    },
-  );
+    // Date only
+    var date = DateTime.now().toIso8601String().split('T')[0];
+    var time = DateTime.now().toIso8601String().split('T')[1].split('.')[0].replaceAll(':', '-');
+    
+    // Generar nombre de archivo con fecha y hora
+    var fileName = 'WSL2-Distro-Manager-Log-$date-$time.txt';
+    
+    // Obtener directorio de Descargas
+    final Directory downloadsDir = Directory('${Platform.environment['USERPROFILE']}\\Downloads');
+    if (!downloadsDir.existsSync()) {
+      downloadsDir.createSync(recursive: true);
+    }
+    
+    // Crear copia del archivo en Descargas
+    final String destinationPath = '${downloadsDir.path}\\$fileName';
+    await file.copy(destinationPath);
+    
+    // Mostrar mensaje de éxito
+    final context = GlobalVariable.infobox.currentContext;
+    if (context != null) {
+      showDialog(
+        context: context,
+        builder: (context) => ContentDialog(
+          title: const Text('Éxito'),
+          content: Text('El archivo de registro se ha guardado en:\n$destinationPath'),
+          actions: [
+            Button(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // Registrar acción de guardado de log
+    logInfo('Log file saved to $destinationPath');
+  } catch (e, stack) {
+    // Registrar error
+    logError(e, stack, 'uploadLog');
+    
+    // Mostrar mensaje de error
+    final context = GlobalVariable.infobox.currentContext;
+    if (context != null) {
+      showDialog(
+        context: context,
+        builder: (context) => ContentDialog(
+          title: const Text('Error'),
+          content: Text('No se pudo guardar el archivo de registro: $e'),
+          actions: [
+            Button(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 }

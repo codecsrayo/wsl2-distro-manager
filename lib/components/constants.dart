@@ -34,8 +34,9 @@ String repoScriptsPersonal =
 String gitApiScriptsLink = gitApiScriptsLinkPersonal; // Usando scripts personales
 String repoScripts = repoScriptsPersonal; // Usando scripts personales
 
+// URL para reportar problemas en GitHub
 const String githubIssues =
-    'https://github.com/codecsrayo/wsl2-distro-manager/issues/new/choose';
+    'https://github.com/codecsrayo/wsl2-distro-manager/issues/new';
 
 const String errorUrl =
     'https://n8n.aachen.dev/webhook/error-logging-1866548e-233f-4c09-a257-9f3deab055b3';
