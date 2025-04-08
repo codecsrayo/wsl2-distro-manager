@@ -388,9 +388,19 @@ class _TemplatePageState extends State<TemplatePage> {
                                       onPressed: () async {
                                         final String inputText = inputController.text.trim();
                                         if (inputText.isNotEmpty) {
+                                          // Guardamos una referencia al contexto antes de la operación asíncrona
+                                          final BuildContext currentContext = dialogContext;
                                           await Templates().useTemplate(name, inputText);
+                                          // Verificamos si el contexto sigue siendo válido antes de usarlo
+                                          if (currentContext.mounted) {
+                                            Navigator.of(currentContext).pop();
+                                          }
+                                        } else {
+                                          // Si no hay texto, simplemente cerramos el diálogo
+                                          if (dialogContext.mounted) {
+                                            Navigator.of(dialogContext).pop();
+                                          }
                                         }
-                                        Navigator.of(dialogContext).pop();
                                       },
                                     ),
                                   ],
