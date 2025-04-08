@@ -276,11 +276,26 @@ class WSLApi {
     // Check if folder is empty and delete
     String path = getInstancePath(distribution).path;
     // Wait 10 seconds in async then delete for Windows to release file
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 10), () async {
       Directory dir = Directory(path);
       if (dir.existsSync()) {
         if (dir.listSync().isEmpty) {
-          dir.deleteSync(recursive: true);
+          try {
+            // Intentar eliminar el directorio normalmente
+            dir.deleteSync(recursive: true);
+          } catch (e) {
+            // Si falla, intenta modificar los atributos del directorio primero
+            try {
+              // Ejecutar comando para quitar el atributo de solo lectura
+              await Process.run('attrib', ['-R', path, '/S', '/D']);
+              // Intentar eliminar nuevamente
+              dir.deleteSync(recursive: true);
+            } catch (e2) {
+              // Si aún falla, registra el error pero permite que la aplicación continúe
+              logDebug(e2, StackTrace.current, 'Error al eliminar directorio: $path - ${e2.toString()}');
+              Notify.message('No se pudo eliminar el directorio de la distribución. Es posible que necesite eliminar manualmente el directorio: $path');
+            }
+          }
         }
       }
     });

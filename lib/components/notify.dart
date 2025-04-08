@@ -16,6 +16,54 @@ class Notify {
   Notify() {
     instance = this;
   }
+  
+  /// Show an error notification
+  static void error(String msg, {
+    Duration? duration,
+    bool loading = false,
+    bool useWidget = false,
+    bool leadingIcon = false,
+    Widget widget = const SizedBox(),
+  }) {
+    message(msg, 
+      duration: duration, 
+      loading: loading, 
+      useWidget: useWidget, 
+      leadingIcon: leadingIcon, 
+      widget: widget);
+  }
+  
+  /// Show a success notification
+  static void success(String msg, {
+    Duration? duration,
+    bool loading = false,
+    bool useWidget = false,
+    bool leadingIcon = false,
+    Widget widget = const SizedBox(),
+  }) {
+    message(msg, 
+      duration: duration, 
+      loading: loading, 
+      useWidget: useWidget, 
+      leadingIcon: leadingIcon, 
+      widget: widget);
+  }
+  
+  /// Show a warning notification
+  static void warning(String msg, {
+    Duration? duration,
+    bool loading = false,
+    bool useWidget = false,
+    bool leadingIcon = false,
+    Widget widget = const SizedBox(),
+  }) {
+    message(msg, 
+      duration: duration, 
+      loading: loading, 
+      useWidget: useWidget, 
+      leadingIcon: leadingIcon, 
+      widget: widget);
+  }
 }
 
 /// Widget
