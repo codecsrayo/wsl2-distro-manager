@@ -1,20 +1,20 @@
 #!/bin/bash
 set -e
-sudo su
+
 echo "Instalando entorno de desarrollo web..."
 
 # Actualizar repositorios
-apt-get update -y
+sudo apt-get update -y
 
 # Instalar dependencias necesarias para añadir repos
-apt-get install -y curl ca-certificates gnupg
+sudo apt-get install -y curl ca-certificates gnupg
 
 # Instalar Node.js 18.x desde NodeSource
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-apt-get install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 # Instalar Yarn globalmente
-npm install -g yarn
+sudo npm install -g yarn
 
 # Verificar versiones instaladas
 echo "Versiones instaladas:"
@@ -23,3 +23,4 @@ npm -v
 yarn -v
 
 echo "✅ Entorno de desarrollo web instalado correctamente!"
+
