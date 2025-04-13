@@ -33,7 +33,7 @@ for user in $(ls /home); do
 done
 
 # Habilitar y arrancar el servicio
-sudo service docker enable
+sudo systemctl enable docker
 sudo service docker start
 
 # Verificar instalación
