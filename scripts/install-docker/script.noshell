@@ -1,40 +1,43 @@
 #!/bin/bash
+set -e
+
 echo "Instalando Docker y Docker Compose..."
 
 # Actualizar paquetes e instalar dependencias
-apt-get update
-apt-get install -y ca-certificates curl make
+apt-get update -y
+apt-get install -y ca-certificates curl make gnupg lsb-release
 
-# Crear directorio para las claves GPG
+# Crear directorio para claves GPG
 install -m 0755 -d /etc/apt/keyrings
 
-# Descargar la clave GPG oficial de Docker
-echo "Descargando clave GPG oficial de Docker..."
+# Descargar y configurar la clave GPG de Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 chmod a+r /etc/apt/keyrings/docker.asc
 
-# Añadir el repositorio de Docker a las fuentes de APT
-echo "Añadiendo repositorio de Docker..."
+# Añadir repositorio oficial de Docker
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Actualizar índice de paquetes APT con el nuevo repositorio
-apt-get update
-
-# Instalar Docker Engine, CLI, Containerd, Buildx y Compose plugin
-echo "Instalando Docker Engine y herramientas relacionadas..."
+# Actualizar e instalar Docker y componentes
+apt-get update -y
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Añadir usuario actual al grupo docker para evitar usar sudo
-usermod -aG docker $USER
-echo "Usuario $USER añadido al grupo docker"
+# Crear grupo docker si no existe
+groupadd -f docker
+
+# Añadir todos los usuarios existentes al grupo docker (opcional)
+for user in $(ls /home); do
+  usermod -aG docker "$user"
+done
+
+# Habilitar y arrancar el servicio
+sudo service docker enable
+sudo service docker start
 
 # Verificar instalación
-echo "Versiones instaladas:"
-docker --version
-docker compose version
+docker --version || echo "Docker no pudo verificar su versión"
+docker compose version || echo "Docker Compose no pudo verificar su versión"
 
-echo "Docker y Docker Compose instalados correctamente!"
-echo "Nota: Es posible que necesites cerrar sesión y volver a iniciarla para usar Docker sin sudo."
+echo "✅ Docker y Docker Compose instalados!"
