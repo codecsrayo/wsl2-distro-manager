@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+sudo su
 echo "Instalando entorno de desarrollo web..."
 
 # Actualizar repositorios
