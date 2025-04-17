@@ -2,10 +2,12 @@ import 'package:localization/localization.dart';
 import 'package:wsl2distromanager/api/templates.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/components/notify.dart';
+import 'package:wsl2distromanager/components/constants.dart';
 import 'analytics.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/dialogs/dialogs.dart';
+import 'package:file_picker/file_picker.dart';
 
 /// Builder for the WSL Distro List Items. Each item is an expander with [item]
 /// as the title and [trailing] as the trailing text. [running] is a list of
@@ -329,6 +331,109 @@ class Bar extends StatelessWidget {
                       icon: const Icon(FluentIcons.settings, size: 16.0),
                       onPressed: () {
                         settingsDialog(widget.item);
+                      }),
+                ),
+              ),
+              Tooltip(
+                message: 'Exportar distro',
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: IconButton(
+                      icon: const Icon(FluentIcons.download, size: 16.0),
+                      onPressed: () async {
+                        // Mostrar el diálogo con un campo de texto y un botón para seleccionar archivo
+                        final controller = TextEditingController();
+                        controller.text = '$defaultPath\\Export-${widget.item}.tar';
+
+                        // Crear un widget personalizado con campo de texto y botón para seleccionar ubicación
+                        Widget exportLocationWidget = StatefulBuilder(
+                          builder: (context, setState) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Seleccione la ubicación donde exportar la distro. Este proceso puede tardar varios minutos dependiendo del tamaño de la distribución.'),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextBox(
+                                        controller: controller,
+                                        placeholder: 'Ruta para exportar',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Button(
+                                      child: const Text('Examinar...'),
+                                      onPressed: () async {
+                                        final result = await FilePicker.platform.saveFile(
+                                          dialogTitle: 'Seleccione ubicación para exportar ${widget.item}',
+                                          fileName: 'Export-${widget.item}.tar',
+                                          type: FileType.any,
+                                        );
+                                        
+                                        if (result != null && context.mounted) {
+                                          setState(() {
+                                            controller.text = result;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        // Mostrar el diálogo con el widget personalizado
+                        await showDialog(
+                          context: GlobalVariable.infobox.currentContext!,
+                          builder: (context) {
+                            return ContentDialog(
+                              title: Text('Exportar ${distroLabel(widget.item)}'),
+                              content: exportLocationWidget,
+                              actions: [
+                                Button(
+                                  child: const Text('Cancelar'),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                FilledButton(
+                                  child: const Text('Exportar'),
+                                  onPressed: () async {
+                                    final exportPath = controller.text;
+                                    if (exportPath.isEmpty) return;
+                                    
+                                    Navigator.pop(context);
+                                    
+                                    // Verificar si la instancia está en ejecución
+                                    bool instanceRunning = widget.running.contains(widget.item);
+                                    
+                                    // Si está en ejecución, detenerla primero
+                                    if (instanceRunning) {
+                                      Notify.message('Deteniendo ${widget.item} antes de exportar...', loading: true);
+                                      await WSLApi().stop(widget.item);
+                                      // Pequeña espera para asegurar que se detenga completamente
+                                      await Future.delayed(const Duration(seconds: 2));
+                                    }
+                                    
+                                    Notify.message('Exportando ${widget.item}...', loading: true);
+                                    plausible.event(name: "wsl_exported");
+                                    await WSLApi().export(widget.item, exportPath);
+                                    Notify.message('${widget.item} exportado con éxito a $exportPath', loading: false);
+                                    
+                                    // Si estaba en ejecución, informar al usuario que fue detenida
+                                    if (instanceRunning) {
+                                      Notify.message('Nota: ${widget.item} ha sido detenida para realizar la exportación', loading: false, duration: const Duration(seconds: 5));
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       }),
                 ),
               ),
