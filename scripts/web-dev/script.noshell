@@ -1,22 +1,26 @@
 #!/bin/bash
+set -e
+
 echo "Instalando entorno de desarrollo web..."
+
 # Actualizar repositorios
-apt update
+sudo apt-get update -y
 
-# Instalar Node.js y npm
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-apt install -y nodejs
+# Instalar dependencias necesarias para añadir repos
+sudo apt-get install -y curl ca-certificates gnupg
 
-# Instalar herramientas adicionales
-npm install -g yarn
-npm install -g @vue/cli
-npm install -g create-react-app
-npm install -g @angular/cli
+# Instalar Node.js 18.x desde NodeSource
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-# Mostrar versiones instaladas
+# Instalar Yarn globalmente
+sudo npm install -g yarn
+
+# Verificar versiones instaladas
 echo "Versiones instaladas:"
 node -v
 npm -v
 yarn -v
 
-echo "Entorno de desarrollo web instalado correctamente!"
+echo "✅ Entorno de desarrollo web instalado correctamente!"
+
